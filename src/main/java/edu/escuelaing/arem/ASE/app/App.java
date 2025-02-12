@@ -1,6 +1,7 @@
 package edu.escuelaing.arem.ASE.app;
 
-import static edu.escuelaing.arem.ASE.app.HttpServer.get;
+import edu.escuelaing.arem.ASE.app.framework.http.HttpServer;
+import static edu.escuelaing.arem.ASE.app.framework.http.HttpServer.get;
 
 public class App {
     private static String staticFilesDirectory = "src/main/java/resources";
@@ -8,7 +9,9 @@ public class App {
     /**
      * Método principal que inicia el servidor y configura servicios.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        System.out.println("Argumentos recibidos: " + (args.length > 0 ? args[0] : "Ninguno"));
+        HttpServer.loadComponents(args);
 
         staticfiles("src/main/java/resources");
 
@@ -38,7 +41,4 @@ public class App {
         staticFilesDirectory = directory;
     }
 
-    public static String getStaticFilesDirectory() {
-        return staticFilesDirectory;
-    }
 }

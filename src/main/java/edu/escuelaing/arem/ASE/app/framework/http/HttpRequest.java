@@ -1,4 +1,4 @@
-package edu.escuelaing.arem.ASE.app;
+package edu.escuelaing.arem.ASE.app.framework.http;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -6,7 +6,7 @@ import java.util.Map;
  * Clase que representa una solicitud HTTP.
  * Esta clase permite analizar la ruta y los parámetros de la consulta de una solicitud HTTP.
  */
-class HttpRequest {
+public class HttpRequest {
     private String path;// Almacena la ruta de la solicitud (antes del signo '?')
     private String query; // Almacena la cadena de consulta de la solicitud (después del '?')
     private Map<String, String> queryParams; // Mapa que contiene los parámetros de la consulta clave-valor

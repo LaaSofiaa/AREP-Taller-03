@@ -1,11 +1,14 @@
-package edu.escuelaing.arem.ASE.app;
+package edu.escuelaing.arem.ASE.app.framework.http;
 
+import edu.escuelaing.arem.ASE.app.framework.annotations.*;
 import java.io.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.URL;
 import java.util.function.BiFunction;
+import java.util.*;
 
 /**
  * Esta clase implementa un servidor HTTP básico que maneja solicitudes GET y POST.
@@ -23,6 +26,7 @@ public class HttpServer {
      * Inicia el servidor y espera conexiones entrantes.
      */
     public static void startServer(){
+
         /// Crea el servidor que escucha en el puerto
         ServerSocket serverSocket = null;
         try {
@@ -39,6 +43,102 @@ public class HttpServer {
             System.exit(1);
         }
     }
+
+    /**
+     * Metodo encargado de cargar los componentes de la aplicación, escaneando los
+     * controladores anotados con @RestController y registrando sus rutas.
+     */
+    public static void loadComponents(String[] args) throws Exception {
+        if (args.length == 0) {System.err.println("proporcionar una clase de configuracionn");}
+
+        Class<?> c = Class.forName(args[0]); // Se carga la clase principal
+        if (!c.isAnnotationPresent(SpringSofiaScan.class)) {
+            System.err.println("La clase principal debe tener @SpringSofiaScan ");}
+
+        String packageToScan = c.getAnnotation(SpringSofiaScan.class).value();
+        System.out.println("Escaneando controladores en: " + packageToScan);
+
+        List<Class<?>> controllers = findControllers(packageToScan);
+
+        for (Class<?> controller : controllers) {
+            if (!controller.isAnnotationPresent(RestController.class)) continue;
+
+            //requestmapping
+            String basePath = "";
+            if (controller.isAnnotationPresent(RequestMapping.class)) {
+                basePath = controller.getAnnotation(RequestMapping.class).value();
+            }
+
+            System.out.println("Controlador detectado: " + controller.getName() + " en " + basePath);
+            Object instance = controller.getDeclaredConstructor().newInstance();
+
+            //mirar si estan los metodos declarados
+            for (Method method : controller.getDeclaredMethods()) {
+                String methodPath = basePath;
+
+                if (method.isAnnotationPresent(RequestMapping.class)) {
+                    RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+                    methodPath += requestMapping.value();
+                }
+
+                if (method.isAnnotationPresent(GetMapping.class)) {
+                    GetMapping annotation = method.getAnnotation(GetMapping.class);
+                    String path = methodPath + annotation.value();
+                    System.out.println("Ruta registrada: " + path);
+
+                    services.put(path, (req, res) -> {
+                        try {
+                            Parameter[] parameters = method.getParameters();
+                            Object[] argsValues = new Object[parameters.length];
+
+                            for (int i = 0; i < parameters.length; i++) {
+                                if (parameters[i].isAnnotationPresent(RequestParam.class)) {
+                                    String paramName = parameters[i].getAnnotation(RequestParam.class).value();
+                                    argsValues[i] = req.getValues(paramName);
+                                }
+                            }
+
+                            return (String) method.invoke(instance, argsValues);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return "Error en el controlador";
+                        }
+                    });
+
+                    System.out.println("Registrado servicio en: " + path);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Busca las clases dentro del paquete especificado que están anotadas con @RestController.
+     * @param packageName Nombre del paquete donde se buscarán los controladores.
+     * @return Lista de clases que contienen la anotación @RestController.
+     * @throws Exception En caso de error al acceder a las clases.
+     */
+    private static List<Class<?>> findControllers(String packageName) throws Exception {
+        List<Class<?>> classes = new ArrayList<>();
+        String path = packageName.replace('.', '/');
+        URL url = Thread.currentThread().getContextClassLoader().getResource(path);
+        if (url == null) return classes;
+
+        File directory = new File(url.toURI());
+        if (directory.exists()) {
+            for (String file : directory.list()) {
+                if (file.endsWith(".class")) {
+                    String className = packageName + "." + file.replace(".class", "");
+                    Class<?> clazz = Class.forName(className);
+                    if (clazz.isAnnotationPresent(RestController.class)) {
+                        classes.add(clazz);
+                    }
+                }
+            }
+        }
+        return classes;
+    }
+
 
     /**
      * Maneja la solicitud de un cliente y delega la acción según el tipo de solicitud.

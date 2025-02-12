@@ -1,12 +1,10 @@
-package edu.escuelaing.arem.ASE.app;
-
-
+package edu.escuelaing.arem.ASE.app.framework.http;
 import java.io.PrintWriter;
 
 /**
  * Clase que representa una respuesta HTTP.
  */
-class HttpResponse {
+public class HttpResponse {
     private final PrintWriter out;
 
     public HttpResponse(PrintWriter out) {
