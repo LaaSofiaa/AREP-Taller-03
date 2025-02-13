@@ -1,6 +1,9 @@
 package edu.escuelaing.arem.ASE.app;
 
 import edu.escuelaing.arem.ASE.app.framework.http.HttpServer;
+
+import java.io.File;
+
 import static edu.escuelaing.arem.ASE.app.framework.http.HttpServer.get;
 
 public class App {
@@ -41,4 +44,7 @@ public class App {
         staticFilesDirectory = directory;
     }
 
+    public static String getStaticFilesDirectory() {
+        return staticFilesDirectory;
+    }
 }
