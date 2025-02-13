@@ -22,6 +22,8 @@ public class AppTest {
 
         HttpServer.getDataStore().clear();
         HttpServer.getServices().clear();
+        HttpServer.loadComponents();
+
 
         App.staticfiles("src/main/java/resources");
 
@@ -55,8 +57,9 @@ public class AppTest {
         BiFunction<HttpRequest, HttpResponse, String> handler = HttpServer.getServices().get("/App/pi");
         assertNotNull(handler, "El manejador para /App/pi no está registrado.");
         String result = handler.apply(httpRequest, httpResponse);
-        assertEquals("El valor de Pi es: "+Math.PI, result);
+        assertEquals(String.valueOf(Math.PI), result, "El valor de Pi devuelto no es correcto.");
     }
+
     @Test
     public void testEuler() {
         HttpRequest httpRequest = new HttpRequest("/App/euler");

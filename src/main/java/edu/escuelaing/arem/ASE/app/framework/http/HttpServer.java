@@ -1,6 +1,8 @@
 package edu.escuelaing.arem.ASE.app.framework.http;
 
 import edu.escuelaing.arem.ASE.app.framework.annotations.*;
+import edu.escuelaing.arem.ASE.app.framework.config.SpringSofiaApp;
+
 import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -49,13 +51,16 @@ public class HttpServer {
      * controladores anotados con @RestController y registrando sus rutas.
      */
     public static void loadComponents() throws Exception {
-
-        List<Class<?>> controllers = findControllers( "edu.escuelaing.arem.ASE.app.framework.controllers");
+        Class<?> configClass = SpringSofiaApp.class;
+        if (!configClass.isAnnotationPresent(SpringSofiaScan.class)) {
+            throw new RuntimeException("SpringSofiaApp no tiene la anotación @SpringSofiaScan");
+        }
+        String packageToScan = configClass.getAnnotation(SpringSofiaScan.class).value();
+        List<Class<?>> controllers = findControllers( packageToScan);
 
         for (Class<?> controller : controllers) {
             if (!controller.isAnnotationPresent(RestController.class)) continue;
 
-            //requestmapping
             String basePath = "";
             if (controller.isAnnotationPresent(RequestMapping.class)) {
                 basePath = controller.getAnnotation(RequestMapping.class).value();
