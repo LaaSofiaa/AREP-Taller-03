@@ -24,4 +24,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)//para pametros de los metodos
 public @interface RequestParam {
     String value();
+    String defaultValue() default "__NO_DEFAULT__";
 }

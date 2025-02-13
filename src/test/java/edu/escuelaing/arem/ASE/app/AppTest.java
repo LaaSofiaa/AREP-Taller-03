@@ -35,7 +35,6 @@ public class AppTest {
 
         HttpServer.get("/App/euler", (req, resp) -> String.valueOf(Math.E));
         HttpServer.get("/App/pi", (req, res) -> String.valueOf(Math.PI));
-        HttpServer.loadComponents(new String[]{"edu.escuelaing.arem.ASE.app.framework.config.SpringSofiaApp"});
     }
 
     @Test

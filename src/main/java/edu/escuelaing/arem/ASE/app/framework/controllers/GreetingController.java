@@ -15,12 +15,15 @@ import edu.escuelaing.arem.ASE.app.framework.annotations.RestController;
 @RequestMapping("/App")
 public class GreetingController {
     @GetMapping("/greeting")
-    public String greeting(@RequestParam("name") String name) {
+    public String greeting(@RequestParam(value = "name", defaultValue = "Usuario") String name) {
         return "Hola, " + name + "!";
     }
 
     @GetMapping("/greetings")
-    public String greeting(@RequestParam("name") String name, @RequestParam("age") String age) {
+    public String greeting(
+            @RequestParam(value = "name", defaultValue = "Usuario") String name,
+            @RequestParam(value = "age", defaultValue = "No") String age
+    ) {
         return "Hola, " + name + "! Tienes " + age + " años.";
     }
 

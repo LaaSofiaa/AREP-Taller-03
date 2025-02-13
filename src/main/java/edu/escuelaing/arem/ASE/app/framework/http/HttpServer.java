@@ -48,17 +48,9 @@ public class HttpServer {
      * Metodo encargado de cargar los componentes de la aplicación, escaneando los
      * controladores anotados con @RestController y registrando sus rutas.
      */
-    public static void loadComponents(String[] args) throws Exception {
-        if (args.length == 0) {System.err.println("proporcionar una clase de configuracionn");}
+    public static void loadComponents() throws Exception {
 
-        Class<?> c = Class.forName(args[0]); // Se carga la clase principal
-        if (!c.isAnnotationPresent(SpringSofiaScan.class)) {
-            System.err.println("La clase principal debe tener @SpringSofiaScan ");}
-
-        String packageToScan = c.getAnnotation(SpringSofiaScan.class).value();
-        System.out.println("Escaneando controladores en: " + packageToScan);
-
-        List<Class<?>> controllers = findControllers(packageToScan);
+        List<Class<?>> controllers = findControllers( "edu.escuelaing.arem.ASE.app.framework.controllers");
 
         for (Class<?> controller : controllers) {
             if (!controller.isAnnotationPresent(RestController.class)) continue;
@@ -93,8 +85,13 @@ public class HttpServer {
 
                             for (int i = 0; i < parameters.length; i++) {
                                 if (parameters[i].isAnnotationPresent(RequestParam.class)) {
-                                    String paramName = parameters[i].getAnnotation(RequestParam.class).value();
-                                    argsValues[i] = req.getValues(paramName);
+                                    RequestParam paramAnnotation = parameters[i].getAnnotation(RequestParam.class);
+                                    String paramName = paramAnnotation.value();
+                                    String paramValue = req.getValues(paramName);
+                                    String defaultValue = paramAnnotation.defaultValue();
+                                    argsValues[i] = (paramValue != null && !paramValue.isEmpty()) ? paramValue
+                                            : (!defaultValue.equals("__NO_DEFAULT__") ? defaultValue : null);
+
                                 }
                             }
 
